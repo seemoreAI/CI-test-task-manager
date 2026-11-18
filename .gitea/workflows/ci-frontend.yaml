@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Smoke Test & UI Tests
         run: |
-          cd services/frontend
+          cd services/frontend/test/
             
           ./smoke_test.sh
           
