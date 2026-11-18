@@ -13,8 +13,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  test-logic:
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Run Maven Tests
+        run: |
+          cd services/archiver 
+          ./mvnw test
+
   build-images:
+    needs: test-logic
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
