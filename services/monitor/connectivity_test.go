@@ -11,8 +11,8 @@ import (
 
 func TestRedisPing(t *testing.T) {
     host := os.Getenv("REDIS_HOST")
-    if host == "" {
-        t.Skip("Skipping Connectivity Test: REDIS_HOST not set (Local Mode)")
+    if host == "" || host == "localhost" {
+        host = "redis" // <--- Принудително го сменяме на името на Docker услугата
     }
 
     rdb := redis.NewClient(&redis.Options{
