@@ -43,7 +43,7 @@ jobs:
       - name: Run Go Tests
         env:
           # Тъй като услугата се достъпва на localhost, променливата ви остава същата като при ръчен тест!
-          REDIS_HOST: localhost 
+          REDIS_HOST: 127.0.0.1 
         run: |
           cd services/monitor
           go mod tidy
