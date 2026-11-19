@@ -1,4 +1,3 @@
-services/monitor/go.sum
 services/frontend/test/node_modules/
 services/frontend/test/test-results/
 services/archiver/target/

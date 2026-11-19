@@ -74,7 +74,8 @@ pipeline {
                 trap 'docker rm -f "$redis" >/dev/null 2>&1 || true; docker network rm "$network" >/dev/null 2>&1 || true' EXIT
                 docker run -d --name "$redis" --network "$network" --network-alias redis redis:7-alpine
                 docker run --rm --network "$network" -e REDIS_HOST=redis \\
-                    -v "$WORKSPACE/services/monitor:/src" -w /src golang:1.21 go test ./...
+                    -v "$WORKSPACE/services/monitor:/src" -w /src golang:1.21 \\
+                    sh -c 'go mod tidy && go get github.com/stretchr/testify/assert && go test -v ./...'
                 '''
             }
         }
