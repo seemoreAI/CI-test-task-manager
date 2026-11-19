@@ -6,4 +6,4 @@ Included microservices:
 - frontend - written in HTML and JavaScript
 - monitor - written in Go
 
-There is one external dependency - Redis is required
+There is one external dependency - Redis is required.

@@ -1,4 +1,4 @@
-# --- Stage 1: The Builder --- 
+# --- Stage 1: The Builder ---
 FROM golang:1.21-alpine AS builder
 
 # Install git for fetching dependencies if necessary
