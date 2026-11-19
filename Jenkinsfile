@@ -8,6 +8,28 @@ pipeline {
         REGISTRY_URL = "192.168.56.12:5000"
     }
     stages {
+        stage('Test the API') {
+            when { 
+                changeset "services/api/**" 
+            }
+            agent {
+                docker {
+                    image 'python:3.12-slim'
+                    // This ensures the container runs as the same user as Jenkins 
+                    // to avoid permission issues with the workspace
+                    args '-u root' 
+                }
+            }
+            steps {
+                sh '''
+                # We are now INSIDE the python container
+                # The workspace is automatically mounted at /home/jenkins/agent/workspace/...
+                cd services/api
+                pip install flask redis pytest
+                python3 -m pytest tests/
+                '''
+            }
+        }
         stage('Build the API') {
             when { 
                 changeset "services/api/**" 
