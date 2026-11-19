@@ -30,6 +30,54 @@ pipeline {
                 '''
             }
         }
+        stage('Test the Archiver') {
+            when {
+                changeset "services/archiver/**"
+            }
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                }
+            }
+            steps {
+                sh 'cd services/archiver && mvn -B test'
+            }
+        }
+        stage('Test the Frontend') {
+            when {
+                changeset "services/frontend/**"
+            }
+            steps {
+                sh '''
+                set -eu
+                image="task-manager-frontend-test:${BUILD_NUMBER}"
+                container="task-manager-frontend-test-${BUILD_NUMBER}-${EXECUTOR_NUMBER}"
+                docker build -t "$image" services/frontend
+                docker run -d --name "$container" --add-host api:127.0.0.1 --add-host monitor:127.0.0.1 "$image"
+                trap 'docker rm -f "$container" >/dev/null 2>&1 || true; docker image rm "$image" >/dev/null 2>&1 || true' EXIT
+                docker run --rm --network "container:$container" \\
+                    -v "$WORKSPACE/services/frontend/test:/tests:ro" \\
+                    alpine:3.20 sh -c 'apk add --no-cache curl && sh /tests/smoke_test.sh'
+                '''
+            }
+        }
+        stage('Test the Monitor') {
+            when {
+                changeset "services/monitor/**"
+            }
+            steps {
+                sh '''
+                set -eu
+                network="task-manager-monitor-test-${BUILD_NUMBER}-${EXECUTOR_NUMBER}"
+                redis="task-manager-monitor-redis-${BUILD_NUMBER}-${EXECUTOR_NUMBER}"
+                docker network create "$network"
+                trap 'docker rm -f "$redis" >/dev/null 2>&1 || true; docker network rm "$network" >/dev/null 2>&1 || true' EXIT
+                docker run -d --name "$redis" --network "$network" --network-alias redis redis:7-alpine
+                docker run --rm --network "$network" -e REDIS_HOST=redis \\
+                    -v "$WORKSPACE/services/monitor:/src" -w /src golang:1.21 go test ./...
+                '''
+            }
+        }
         stage('Build the API') {
             when { 
                 changeset "services/api/**" 
